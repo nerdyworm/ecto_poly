@@ -70,18 +70,9 @@ defmodule EctoPoly.Type do
   end
 
   def dump(%{:__struct__ => module} = data) do
-    embed_type =
-      {:embed,
-       %Ecto.Embedded{
-         cardinality: :one,
-         related: module,
-         field: :data
-       }}
-
-    with {:ok, result} <- Ecto.Type.dump(embed_type, data, &dump_value/2),
-         result = result |> Map.put(@type_field, Atom.to_string(module)) do
-      {:ok, result}
-    end
+    result = Ecto.embedded_dump(data, :json)
+    result = result |> Map.put(@type_field, Atom.to_string(module))
+    {:ok, result}
   end
 
   def dump_value(type, value) do
@@ -128,36 +119,6 @@ defmodule EctoPoly.Type do
   end
 
   def load(schema, data) do
-    type = %{cardinality: :one, related: schema, field: :noop}
-
-    Ecto.Type.load({:embed, type}, data, fn
-      :naive_datetime, value ->
-        case DateTime.from_iso8601(value) do
-          {:ok, datetime, _} -> {:ok, datetime}
-          {:ok, datetime} -> {:ok, datetime}
-          {:error, error} -> {:error, error}
-        end
-
-      :date, nil ->
-        {:ok, nil}
-
-      :date, value ->
-        Date.from_iso8601(value)
-
-      {:embed, %Ecto.Embedded{cardinality: :one, related: related}}, item ->
-        load(related, item)
-
-      {:embed, %Ecto.Embedded{cardinality: :many, related: related}}, many ->
-        many =
-          Enum.map(many, fn item ->
-            {:ok, item} = load(related, item)
-            item
-          end)
-
-        {:ok, many}
-
-      _type, value ->
-        {:ok, value}
-    end)
+    {:ok, Ecto.embedded_load(schema, data, :json)}
   end
 end
