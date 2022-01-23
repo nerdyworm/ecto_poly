@@ -28,4 +28,6 @@ defmodule EctoPoly.Util do
     end)
     |> Enum.into(%{})
   end
+
+  def struct_to_map(any), do: any
 end

@@ -185,6 +185,29 @@ defmodule EctoPolyTest do
            }
   end
 
+  test "changeset" do
+    changeset =
+      %Thing{}
+      |> Thing.changeset(%{
+        "data" => %{
+          "__type__" => Nested |> to_string,
+          "cupcake" => %{"frosting" => "yes please"}
+        }
+      })
+
+    thing =
+      Thing.changeset(changeset, %{
+        "data" => %{
+          "__type__" => Nested |> to_string,
+          "cupcake" => %{"frosting" => "no thanks"}
+        }
+      })
+      |> Ecto.Changeset.apply_action!(:insert)
+
+    assert thing.data.cupcake
+    assert "no thanks" == thing.data.cupcake.frosting
+  end
+
   def errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->

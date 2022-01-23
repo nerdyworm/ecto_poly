@@ -4,6 +4,10 @@ defmodule EctoPoly.Changeset do
   import EctoPoly.Util
 
   def cast(%Ecto.Changeset{params: params} = changeset, field) do
+    # ensure that we can cast() the params into the changeset
+    types = Map.put(changeset.types, field, EctoPoly.Type)
+    changeset = put_in(changeset.types, types)
+
     changeset
     |> cast(params, [field])
     |> add_embed_type(field)
@@ -69,7 +73,7 @@ defmodule EctoPoly.Changeset do
       %{:__type__ => _kind} ->
         cast_embed(changeset, field)
 
-      %{:__struct__ => module} = data ->
+      %{:__struct__ => _module} = data ->
         data = struct_to_map(data)
 
         params =
