@@ -44,6 +44,12 @@ defmodule EctoPoly.Type do
     {:ok, map}
   end
 
+  def load(%{__type__: module} = data) when is_map(data) do
+    module
+    |> String.to_existing_atom()
+    |> load(data)
+  end
+
   def load(%{"__type__" => module} = data) when is_map(data) do
     module
     |> String.to_existing_atom()
