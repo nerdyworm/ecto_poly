@@ -6,6 +6,10 @@ defmodule EctoPoly.Type do
 
   def type, do: :map
 
+  def embed_as(_) do
+    :dump
+  end
+
   def cast(%{"__type__" => type} = map) do
     type =
       type

@@ -208,6 +208,31 @@ defmodule EctoPolyTest do
     assert "no thanks" == thing.data.cupcake.frosting
   end
 
+  test "embeds_many" do
+    {:ok, many} =
+      %EmbedsMany{}
+      |> EmbedsMany.changeset(%{
+        "data" => [
+          %{
+            "hello" => "testing",
+            "data" => %{"__type__" => to_string(Anything), "name" => "testing"}
+          },
+          %{
+            "hello" => "testing",
+            "data" => %{"__type__" => to_string(Anything), "name" => "testing"}
+          }
+        ]
+      })
+      |> Repo.insert()
+
+    assert many.data != []
+
+
+    assert {:ok, %{rows: [[[a, b]]]}} = Repo.query("select data from things")
+    assert a["data"]["__type__"] == "Elixir.Anything"
+    assert b["data"]["__type__"] == "Elixir.Anything"
+  end
+
   def errors_on(changeset) do
     Ecto.Changeset.traverse_errors(changeset, fn {message, opts} ->
       Regex.replace(~r"%{(\w+)}", message, fn _, key ->

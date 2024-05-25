@@ -29,7 +29,7 @@ defmodule Thing do
   @doc false
   def changeset(config, attrs) do
     config
-    |> cast(attrs, [])
+    |> cast(attrs, [:id])
     |> cast_poly(:data)
     |> cast_poly(:meta)
   end
@@ -103,5 +103,40 @@ defmodule Nested do
     |> cast(attrs, [])
     |> cast_embed(:cupcake)
     |> cast_embed(:things)
+  end
+end
+
+defmodule ManyNestedEmbed do
+  use Ecto.Schema
+  import Ecto.Changeset
+  import EctoPoly
+
+  embedded_schema do
+    field(:hello, :string)
+    embed_poly(:data)
+  end
+
+  @doc false
+  def changeset(config, attrs) do
+    config
+    |> cast(attrs, [:hello])
+    |> cast_poly(:data)
+  end
+end
+
+defmodule EmbedsMany do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  schema "things" do
+    embeds_many(:data, ManyNestedEmbed)
+    timestamps()
+  end
+
+  @doc false
+  def changeset(config, attrs) do
+    config
+    |> cast(attrs, [])
+    |> cast_embed(:data)
   end
 end
