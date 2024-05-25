@@ -1,6 +1,6 @@
-use Mix.Config
+import Config
 
-config :logger, level: :warn
+config :logger, level: :warning
 
 config :ecto_poly, ecto_repos: [Repo]
 
